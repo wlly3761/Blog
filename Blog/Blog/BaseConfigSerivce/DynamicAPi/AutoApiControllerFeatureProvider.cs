@@ -10,10 +10,6 @@ public class AutoApiControllerFeatureProvider : ControllerFeatureProvider
     {
         //使用注解的方式进行识别
         var hasAnnotation = Attribute.IsDefined(typeInfo, typeof(DynamicApiAttribute));
-        if (typeInfo.Name == "TestService")
-        {
-            
-        }
         //判断是否使用了指定注解
         if (hasAnnotation)
         {

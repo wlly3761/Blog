@@ -1,3 +1,4 @@
+using Application.Test;
 using Blog.BaseConfigSerivce;
 using Blog.BaseConfigSerivce.DynamicAPi;
 using Blog.BaseConfigSerivce.Filter;
@@ -8,9 +9,9 @@ using Blog.BaseConfigSerivce.Swagger;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json",optional:false,reloadOnChange:true);
 builder.Services.JwtRegesiterService(builder.Configuration);
+builder.Services.AutoRegistryService();
 builder.Services.AddControllers().AddDynamicWebApi();
 builder.Services.AddSwaggerGenExtend();
-builder.Services.AutoRegistryService();
 builder.Services.AddSqlsugarSetup(builder.Configuration);
 builder.Services.AddMvc(options =>
 {
