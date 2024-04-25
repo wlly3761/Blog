@@ -33,7 +33,11 @@ public class AssemblyHelper
 
         return list;
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="assemblyName"></param>
+    /// <returns></returns>
     public static Assembly GetAssembly(string assemblyName)
     {
         return GetAllAssemblies().FirstOrDefault(f => f.FullName != null && f.FullName.Contains(assemblyName))!;
