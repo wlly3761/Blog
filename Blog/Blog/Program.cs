@@ -1,4 +1,3 @@
-using Application.Test;
 using Blog.BaseConfigSerivce;
 using Blog.BaseConfigSerivce.DynamicAPi;
 using Blog.BaseConfigSerivce.Filter;
@@ -7,7 +6,8 @@ using Blog.BaseConfigSerivce.SqlSugar;
 using Blog.BaseConfigSerivce.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.json",optional:false,reloadOnChange:true);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true).AddJsonFile(
+    $"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: false, reloadOnChange: true);
 builder.Services.JwtRegesiterService(builder.Configuration);
 builder.Services.AutoRegistryService();
 builder.Services.AddControllers().AddDynamicWebApi();
@@ -16,6 +16,7 @@ builder.Services.AddSqlsugarSetup(builder.Configuration);
 builder.Services.AddMvc(options =>
 {
     options.Filters.Add<ApiFilter>();
+    
 });
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 var app = builder.Build();
