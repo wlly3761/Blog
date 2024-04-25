@@ -16,23 +16,23 @@ public static class SqlSugarInit
             var client = new SqlSugarClient(new ConnectionConfig()
             {
                 ConnectionString = configuration.GetValue<string>("DBConnection"),
-                DbType = DbType.SqlServer,
+                DbType =DbType.MySql,
                 IsAutoCloseConnection = true,
                 ConfigId = "1"
             });
             return client;
         });
-        services.AddScoped<ISqlSugarClient>(o =>
-        {
-            var client = new SqlSugarClient(new ConnectionConfig()
-            {
-                ConnectionString = configuration.GetValue<string>("DBConnection2"),
-                DbType = DbType.SqlServer,
-                IsAutoCloseConnection = true,
-                ConfigId = "2"
-            });
-            return client;
-        });
+        // services.AddScoped<ISqlSugarClient>(o =>
+        // {
+        //     var client = new SqlSugarClient(new ConnectionConfig()
+        //     {
+        //         ConnectionString = configuration.GetValue<string>("DBConnection2"),
+        //         DbType = DbType.SqlServer,
+        //         IsAutoCloseConnection = true,
+        //         ConfigId = "2"
+        //     });
+        //     return client;
+        // });
         services.ConfigurationSugar(db =>
         {
             //db.GetConnection("1").Aop.OnLogExecuting = (sql, p) =>
