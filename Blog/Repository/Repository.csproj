@@ -8,14 +8,14 @@
 
 
     <ItemGroup>
-      <PackageReference Include="SqlSugar.IOC" Version="2.0.0" />
-      <PackageReference Include="SqlSugarCore" Version="5.1.4.152" />
+        <PackageReference Include="SqlSugar.IOC" Version="2.0.0"/>
+        <PackageReference Include="SqlSugarCore" Version="5.1.4.152"/>
     </ItemGroup>
 
 
     <ItemGroup>
-      <Folder Include="QueryModel\" />
-      <Folder Include="ViewModel\" />
+        <Folder Include="QueryModel\"/>
+        <Folder Include="ViewModel\"/>
     </ItemGroup>
 
 </Project>

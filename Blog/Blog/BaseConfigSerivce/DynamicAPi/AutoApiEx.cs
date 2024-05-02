@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Blog.BaseConfigSerivce.DynamicAPi;
 
@@ -7,10 +6,7 @@ public static class AutoApiEx
 {
     public static IMvcBuilder AddDynamicWebApi(this IMvcBuilder builder)
     {
-        if (builder == null)
-        {
-            throw new ArgumentNullException(nameof(builder));
-        }
+        if (builder == null) throw new ArgumentNullException(nameof(builder));
 
         builder.ConfigureApplicationPartManager(applicationPartManager =>
         {
@@ -27,10 +23,7 @@ public static class AutoApiEx
 
     public static IMvcCoreBuilder AddDynamicWebApi(this IMvcCoreBuilder builder)
     {
-        if (builder == null)
-        {
-            throw new ArgumentNullException(nameof(builder));
-        }
+        if (builder == null) throw new ArgumentNullException(nameof(builder));
 
         builder.ConfigureApplicationPartManager(applicationPartManager =>
         {

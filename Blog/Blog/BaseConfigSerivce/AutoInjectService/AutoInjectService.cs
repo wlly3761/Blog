@@ -1,5 +1,4 @@
-﻿
-using Core.Attribute;
+﻿using Core.Attribute;
 
 namespace Blog.BaseConfigSerivce;
 
@@ -9,15 +8,16 @@ public static class AutoInjectService
     {
         var types = AssemblyHelper.GetTypesByAssembly("Application").ToArray();
         foreach (var serviceType in types)
-        {
             if (Attribute.IsDefined(serviceType, typeof(DynamicApiAttribute)))
             {
-                var serviceRegistryAttribute = (DynamicApiAttribute)serviceType.GetCustomAttributes(typeof(DynamicApiAttribute), false).FirstOrDefault()!;
-                if(serviceRegistryAttribute==null) continue;
+                var serviceRegistryAttribute =
+                    (DynamicApiAttribute)serviceType.GetCustomAttributes(typeof(DynamicApiAttribute), false)
+                        .FirstOrDefault()!;
+                if (serviceRegistryAttribute == null) continue;
                 var interfaces = serviceType.GetInterfaces();
                 //获取首个接口
-                Type? serviceInterfaceType = interfaces.FirstOrDefault();
-                if(serviceInterfaceType==null) continue;
+                var serviceInterfaceType = interfaces.FirstOrDefault();
+                if (serviceInterfaceType == null) continue;
                 switch (serviceRegistryAttribute.ServiceLifeCycle)
                 {
                     case "Singleton":
@@ -30,9 +30,8 @@ public static class AutoInjectService
                         serviceCollection.AddTransient(serviceInterfaceType, serviceType);
                         break;
                 }
-
             }
-        }
+
         return serviceCollection;
     }
 }

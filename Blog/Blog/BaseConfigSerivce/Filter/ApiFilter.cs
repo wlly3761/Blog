@@ -2,7 +2,7 @@
 
 namespace Blog.BaseConfigSerivce.Filter;
 
-public class ApiFilter:ActionFilterAttribute
+public class ApiFilter : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {

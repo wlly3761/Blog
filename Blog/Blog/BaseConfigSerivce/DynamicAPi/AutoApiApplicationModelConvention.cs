@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text;
+using Core.Attribute;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Text;
-using Core.Attribute;
 
 namespace Blog.BaseConfigSerivce.DynamicAPi;
 
@@ -12,49 +12,33 @@ public class AutoApiApplicationModelConvention : IApplicationModelConvention
     public void Apply(ApplicationModel application)
     {
         foreach (var controller in application.Controllers)
-        {
-            if (Attribute.IsDefined(controller.ControllerType,typeof(DynamicApiAttribute)))
-            {
+            if (Attribute.IsDefined(controller.ControllerType, typeof(DynamicApiAttribute)))
                 ConfigureApplicationService(controller);
-            }
-        }
     }
+
     private void ConfigureApplicationService(ControllerModel controller)
     {
-        ConfigureApiExplorer(controller);//api是否允许被发现
-        ConfigureSelector(controller);//路由配置
-        ConfigureParameters(controller);//参数配置
+        ConfigureApiExplorer(controller); //api是否允许被发现
+        ConfigureSelector(controller); //路由配置
+        ConfigureParameters(controller); //参数配置
     }
 
     private void ConfigureApiExplorer(ControllerModel controller)
     {
-        if (!controller.ApiExplorer.IsVisible.HasValue)
-        {
-            controller.ApiExplorer.IsVisible = true;
-        }
+        if (!controller.ApiExplorer.IsVisible.HasValue) controller.ApiExplorer.IsVisible = true;
 
         foreach (var action in controller.Actions)
-        {
             if (!action.ApiExplorer.IsVisible.HasValue)
-            {
                 action.ApiExplorer.IsVisible = true;
-            }
-        }
     }
 
     private void ConfigureSelector(ControllerModel controller)
     {
         RemoveEmptySelectors(controller.Selectors);
 
-        if (controller.Selectors.Any(temp => temp.AttributeRouteModel != null))
-        {
-            return;
-        }
+        if (controller.Selectors.Any(temp => temp.AttributeRouteModel != null)) return;
 
-        foreach (var action in controller.Actions)
-        {
-            ConfigureSelector(action);
-        }
+        foreach (var action in controller.Actions) ConfigureSelector(action);
     }
 
     private void ConfigureSelector(ActionModel action)
@@ -62,41 +46,31 @@ public class AutoApiApplicationModelConvention : IApplicationModelConvention
         RemoveEmptySelectors(action.Selectors);
 
         if (action.Selectors.Count <= 0)
-        {
             AddApplicationServiceSelector(action);
-        }
         else
-        {
             NormalizeSelectorRoutes(action);
-        }
     }
 
     private void ConfigureParameters(ControllerModel controller)
     {
         foreach (var action in controller.Actions)
+        foreach (var parameter in action.Parameters)
         {
-            foreach (var parameter in action.Parameters)
+            if (parameter.BindingInfo != null) continue;
+
+            if (parameter.ParameterType.IsClass &&
+                parameter.ParameterType != typeof(string) &&
+                parameter.ParameterType != typeof(IFormFile))
             {
-                if (parameter.BindingInfo != null)
-                {
+                var httpMethods = action.Selectors.SelectMany(temp => temp.ActionConstraints)
+                    .OfType<HttpMethodActionConstraint>().SelectMany(temp => temp.HttpMethods).ToList();
+                if (httpMethods.Contains("GET") ||
+                    httpMethods.Contains("DELETE") ||
+                    httpMethods.Contains("TRACE") ||
+                    httpMethods.Contains("HEAD"))
                     continue;
-                }
 
-                if (parameter.ParameterType.IsClass &&
-                    parameter.ParameterType != typeof(string) &&
-                    parameter.ParameterType != typeof(IFormFile))
-                {
-                    var httpMethods = action.Selectors.SelectMany(temp => temp.ActionConstraints).OfType<HttpMethodActionConstraint>().SelectMany(temp => temp.HttpMethods).ToList();
-                    if (httpMethods.Contains("GET") ||
-                        httpMethods.Contains("DELETE") ||
-                        httpMethods.Contains("TRACE") ||
-                        httpMethods.Contains("HEAD"))
-                    {
-                        continue;
-                    }
-
-                    parameter.BindingInfo = BindingInfo.GetBindingInfo(new[] { new FromBodyAttribute() });
-                }
+                parameter.BindingInfo = BindingInfo.GetBindingInfo(new[] { new FromBodyAttribute() });
             }
         }
     }
@@ -106,14 +80,12 @@ public class AutoApiApplicationModelConvention : IApplicationModelConvention
         foreach (var selector in action.Selectors)
         {
             if (selector.AttributeRouteModel == null)
-            {
-                selector.AttributeRouteModel = new AttributeRouteModel(new RouteAttribute(CalculateRouteTemplate(action)));
-            }
+                selector.AttributeRouteModel =
+                    new AttributeRouteModel(new RouteAttribute(CalculateRouteTemplate(action)));
 
-            if (selector.ActionConstraints.OfType<HttpMethodActionConstraint>().FirstOrDefault()?.HttpMethods.FirstOrDefault() == null)
-            {
-                selector.ActionConstraints.Add(new HttpMethodActionConstraint(new[] { GetHttpMethod(action) }));
-            }
+            if (selector.ActionConstraints.OfType<HttpMethodActionConstraint>().FirstOrDefault()?.HttpMethods
+                    .FirstOrDefault() ==
+                null) selector.ActionConstraints.Add(new HttpMethodActionConstraint(new[] { GetHttpMethod(action) }));
         }
     }
 
@@ -172,10 +144,7 @@ public class AutoApiApplicationModelConvention : IApplicationModelConvention
         //        break;
         //    }
         //}
-        if (!string.IsNullOrEmpty(actionName))
-        {
-            routeTemplate.Append($"/{actionName}");
-        }
+        if (!string.IsNullOrEmpty(actionName)) routeTemplate.Append($"/{actionName}");
 
         return routeTemplate.ToString();
     }
@@ -183,25 +152,13 @@ public class AutoApiApplicationModelConvention : IApplicationModelConvention
     private string GetHttpMethod(ActionModel action)
     {
         var actionName = action.ActionName;
-        if (actionName.StartsWith("Get"))
-        {
-            return "GET";
-        }
+        if (actionName.StartsWith("Get")) return "GET";
 
-        if (actionName.StartsWith("Put") || actionName.StartsWith("Update"))
-        {
-            return "PUT";
-        }
+        if (actionName.StartsWith("Put") || actionName.StartsWith("Update")) return "PUT";
 
-        if (actionName.StartsWith("Delete") || actionName.StartsWith("Remove"))
-        {
-            return "DELETE";
-        }
+        if (actionName.StartsWith("Delete") || actionName.StartsWith("Remove")) return "DELETE";
 
-        if (actionName.StartsWith("Patch"))
-        {
-            return "PATCH";
-        }
+        if (actionName.StartsWith("Patch")) return "PATCH";
 
         return "POST";
     }
@@ -212,13 +169,11 @@ public class AutoApiApplicationModelConvention : IApplicationModelConvention
         {
             var selector = selectors[i];
             if (selector.AttributeRouteModel == null &&
-                (selector.ActionConstraints.Count <= 0)
+                selector.ActionConstraints.Count <= 0
                 &&
-                (selector.EndpointMetadata.Count <= 0)
+                selector.EndpointMetadata.Count <= 0
                )
-            {
                 selectors.Remove(selector);
-            }
         }
     }
 }
