@@ -8,7 +8,7 @@ namespace Repository;
 ///     仓储层基类
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
-public class BaseRepository<TEntity> : IBaseRepository<TEntity>
+public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity>
     where TEntity : class, new()
 {
     protected readonly ISqlSugarClient _sqlSugarClient;

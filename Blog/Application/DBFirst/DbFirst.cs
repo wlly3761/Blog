@@ -1,10 +1,12 @@
 using Core.Attribute;
+using Repository;
+using Repository.Model;
 using SqlSugar;
 
 namespace Application.DBFirst;
 
 [DynamicApi(ServiceLifeCycle = "Scoped")]
-public class DbFirst : IDbFirst
+public class DbFirst : BaseRepository<CertificateModel>,IDbFirst
 {
     // private readonly ISqlSugarClient _sugarClient;
     //
@@ -58,4 +60,7 @@ public class DbFirst : IDbFirst
     //         })
     //         .CreateClassFile("/Users/wenni/wl/SelfProject/Blog/Blog/Repository/Model");
     // }
+    public DbFirst(ISqlSugarClient sqlSugarClient) : base(sqlSugarClient)
+    {
+    }
 }
