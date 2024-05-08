@@ -5,7 +5,7 @@ using SqlSugar;
 
 namespace Application.DBFirst;
 
-[DynamicApi(ServiceLifeCycle = "Scoped")]
+// [DynamicApi(ServiceLifeCycle = "Scoped")]
 public class DbFirst : BaseRepository<CertificateModel>,IDbFirst
 {
     // private readonly ISqlSugarClient _sugarClient;

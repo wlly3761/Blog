@@ -21,7 +21,7 @@ builder.Services.AddControllers().AddDynamicWebApi();
 builder.Services.AddSwaggerGenExtend();
 // builder.Services.AddSqlsugarSetup(builder.Configuration);
 // builder.Logging.ClearProviders();
-// builder.Logging.AddNLog("NLog.config");
+builder.Logging.AddNLog("NLog.config");
 // builder.Host.UseNLog();
 builder.Services.AddMvc(options => { options.Filters.Add<ApiFilter>(); });
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -29,11 +29,12 @@ builder.Services.AddHttpClient();
 //注册SignalR
 builder.Services.AddSignalR();
 //注册Quartz任务调度
-//注入调度中心
-builder.Services.AddSingleton<SchedulerCenter>();
+
 //注入Quartz任何工厂及调度工厂
 builder.Services.AddSingleton<IJobFactory, QuartzJobFactory>();
 builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+//注入调度中心
+builder.Services.AddSingleton<SchedulerCenter>();
 //注入具体实现业务作业
 builder.Services.AddTransient<TestTrigger>();
 builder.Services.AddTransient<TestJob>();

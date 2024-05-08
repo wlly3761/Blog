@@ -1,4 +1,5 @@
 using Application.Test;
+using Blog.BaseConfigSerivce;
 using Quartz;
 using Quartz.Spi;
 
@@ -7,12 +8,14 @@ namespace Core.Quartz;
 public class SchedulerCenter
 {
     private readonly IJobFactory _jobFactory;
+    private readonly QuartzJobFactory _quartzJobFactory;
     private readonly ISchedulerFactory _schedulerFactory;
     private IScheduler _scheduler;
-    public SchedulerCenter(IJobFactory jobFactory, ISchedulerFactory schedulerFactory)
+    public SchedulerCenter(IJobFactory jobFactory, ISchedulerFactory schedulerFactory,QuartzJobFactory quartzJobFactory)
     {
         _jobFactory = jobFactory;
         _schedulerFactory = schedulerFactory;
+        _quartzJobFactory = quartzJobFactory;
     }
     public async void StartScheduler()
     {
@@ -25,31 +28,33 @@ public class SchedulerCenter
        
 
         //3、定义作业详细信息并将其与HelloJob任务相关联
-        IJobDetail job = JobBuilder.Create<TestJob>()
-            .WithIdentity("testJob", "HelloJobGroup")
-            .Build();
-        //4、配置触发条件：立即触发作业运行，然后每10秒重复一次
-        ITrigger trigger = TriggerBuilder.Create()
-            .WithIdentity("trigger1", "HelloJobGroup")
-            .StartNow()
-            .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(10)
-                .RepeatForever())
-            .Build();
-        IJobDetail job2 = JobBuilder.Create<TestTrigger>()
-            .WithIdentity("testTrigger", "HelloJobGroup2")
-            .Build();
-        ITrigger trigger2 = TriggerBuilder.Create()
-            .WithIdentity("trigger2", "HelloJobGroup2")
-            .StartNow()
-            .WithSimpleSchedule(x => x
-                .WithIntervalInSeconds(10)
-                .RepeatForever())
-            .Build();
+        IJobDetail job= _quartzJobFactory.CreateJobDetail("TestJob", "testJob", "HelloJobGroup");
+        ITrigger  trigger=_quartzJobFactory.CreateTrigger("testJob", "HelloJobGroup");
+        // IJobDetail job = JobBuilder.Create<TestJob>()
+        //     .WithIdentity("testJob", "HelloJobGroup")
+        //     .Build();
+        // //4、配置触发条件：立即触发作业运行，然后每10秒重复一次
+        // ITrigger trigger = TriggerBuilder.Create()
+        //     .WithIdentity("trigger1", "HelloJobGroup")
+        //     .StartNow()
+        //     .WithSimpleSchedule(x => x
+        //         .WithIntervalInSeconds(10)
+        //         .RepeatForever())
+        //     .Build();
+        // IJobDetail job2 = JobBuilder.Create<TestTrigger>()
+        //     .WithIdentity("testTrigger", "HelloJobGroup2")
+        //     .Build();
+        // ITrigger trigger2 = TriggerBuilder.Create()
+        //     .WithIdentity("trigger2", "HelloJobGroup2")
+        //     .StartNow()
+        //     .WithSimpleSchedule(x => x
+        //         .WithIntervalInSeconds(10)
+        //         .RepeatForever())
+        //     .Build();
 
         //5、将作业与触发条件添加到调度实例并进行关联
         await _scheduler.ScheduleJob(job, trigger);
-        await _scheduler.ScheduleJob(job2, trigger2);
+        // await _scheduler.ScheduleJob(job2, trigger2);
         //2、打开调度器
         await _scheduler.Start();
         // 保持主线程活动，以便调度器可以运行  

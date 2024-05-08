@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Quartz;
 using Quartz.Spi;
 
@@ -36,6 +35,31 @@ public class QuartzJobFactory : IJobFactory
  
         return job;
     }
+    public IJobDetail CreateJobDetail(string jobType, string jobName, string groupName)  
+    {  
+        // 假设你有一个机制来将jobType映射到具体的作业类型  
+        Type jobTypeToCreate = Type.GetType(jobType); // 或使用其他逻辑来确定类型  
+        if (jobTypeToCreate == null || !typeof(IJob).IsAssignableFrom(jobTypeToCreate))  
+        {  
+            throw new InvalidOperationException("Invalid job type.");  
+        }  
+  
+        // 使用依赖注入容器来创建作业实例  
+        IJob jobInstance = (IJob)_serviceProvider.GetService(jobTypeToCreate);  
+        return JobBuilder.Create(jobInstance.GetType())  
+            .WithIdentity(jobName, groupName)
+            .Build();  
+    }
+    public ITrigger CreateTrigger(string jobName, string groupName)  
+    {  
+        return TriggerBuilder.Create()
+            .WithIdentity(jobName, groupName)
+            .StartNow()
+            .WithSimpleSchedule(x => x
+                .WithIntervalInSeconds(10)
+                .RepeatForever())
+            .Build();
+    }  
  
     /// <summary>
     /// 清理Quartz任务
